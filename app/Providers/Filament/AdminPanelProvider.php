@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Manrope')
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups(['Recruitment', 'Talent', 'Oversight'])
+            ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light)
             ->colors([
                 'primary' => Color::Red,

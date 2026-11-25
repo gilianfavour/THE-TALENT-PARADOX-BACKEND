@@ -169,7 +169,7 @@ class MatchEngine
         if ($demonstratedCount >= 3) {
             $potential += 4;
             $signals[] = 'strong_demonstrated';
-            $explanations[] = "{$demonstratedCount} skills verified by assessment (avg " . round($demAvg) . '/100)";
+            $explanations[] = "{$demonstratedCount} skills verified by assessment (avg " . round($demAvg) . "/100)";
         }
         if (! empty($flags['career_changer'])) {
             $potential += 4;

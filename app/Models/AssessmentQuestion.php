@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class AssessmentQuestion extends Model
+{
+    protected $fillable = ['skill_id', 'question', 'options', 'correct_index', 'difficulty'];
+
+    protected $casts = ['options' => 'array'];
+
+    public function skill(): BelongsTo
+    {
+        return $this->belongsTo(Skill::class);
+    }
+}

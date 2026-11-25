@@ -18,7 +18,16 @@ class ApplicationResource extends Resource
 {
     protected static ?string $model = Application::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxStack;
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        $new = Application::whereIn('status', ['applied', 'screening'])->count();
+
+        return $new > 0 ? (string) $new : null;
+    }
 
     public static function form(Schema $schema): Schema
     {

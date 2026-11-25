@@ -14,6 +14,7 @@ use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Support\HtmlString;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -30,10 +31,19 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('TalentBridge - Donswift')
+            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogoHeight('2rem')
+            ->font('Manrope')
+            ->sidebarCollapsibleOnDesktop()
             ->defaultThemeMode(ThemeMode::Light)
             ->colors([
                 'primary' => Color::Red,
+                'gray' => Color::Zinc,
             ])
+            ->renderHook('panels::head.end', fn (): HtmlString => new HtmlString(view('filament.admin-styles')->render()))
+            ->renderHook('panels::auth.login.form.after', fn (): HtmlString => new HtmlString(
+                '<p style="margin-top:1rem;text-align:center;font-size:.8rem;color:#71717a">Demo login: admin@secondlook.test / password</p>'
+            ))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

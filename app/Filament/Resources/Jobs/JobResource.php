@@ -18,7 +18,18 @@ class JobResource extends Resource
 {
     protected static ?string $model = Job::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;
+
+    protected static ?string $navigationLabel = 'Vacancies';
+
+    protected static ?string $modelLabel = 'vacancy';
+
+    protected static ?int $navigationSort = 0;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Job::open()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

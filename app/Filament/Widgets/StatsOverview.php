@@ -15,6 +15,9 @@ class StatsOverview extends StatsOverviewWidget
     {
         $apps = Application::query();
         $avg = $apps->avg('ai_score');
+        $trend = collect(range(6, 0))
+            ->map(fn ($d) => Application::whereDate('created_at', now()->subDays($d)->toDateString())->count())
+            ->all();
 
         return [
             Stat::make('Open vacancies', Job::open()->count())
@@ -23,7 +26,9 @@ class StatsOverview extends StatsOverviewWidget
             Stat::make('Active candidates', Candidate::where('status', 'active')->count())
                 ->icon('heroicon-o-user-group'),
             Stat::make('Applications in pipeline', $apps->count())
-                ->description('avg AI score ' . ($avg ? round($avg) : '—') . '/100')
+                ->description('avg compatibility ' . ($avg ? round($avg) : '—') . '/100')
+                ->chart($trend)
+                ->color('primary')
                 ->icon('heroicon-o-inbox-stack'),
             Stat::make('Hidden gems surfaced', Application::where('match_snapshot', 'like', '%hidden_gem%')->count())
                 ->description('would have been missed by CV screening')

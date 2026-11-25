@@ -35,6 +35,43 @@ class DatabaseSeeder extends Seeder
         $this->seedPipeline($candidates, $jobs);
 
         app(MatchEngine::class)->refreshAll();
+        $this->seedTalentDiscovery($candidates);
+    }
+
+    /** Non-CV experiences, rediscovery recommendations and a first invitation for the demo story. */
+    private function seedTalentDiscovery(array $candidates): void
+    {
+        $discovery = app(\App\Services\TalentDiscovery::class);
+        $stories = [
+            'baraka' => [
+                ['type' => 'informal', 'title' => 'Stock and sales records, family shop', 'organisation' => 'Mushi General Store', 'description' => 'Kept daily sales and stock in Excel, reconciled cash every evening, built a simple report showing best-selling items each month for data analysis.'],
+                ['type' => 'self_learning', 'title' => 'Self-taught spreadsheets and data analysis', 'description' => 'Completed free online courses in Excel pivot tables and data analysis. Built dashboards for two local businesses.', 'evidence_url' => 'https://example.com/baraka-dashboard'],
+            ],
+            'emmanuel' => [
+                ['type' => 'entrepreneurship', 'title' => 'Delivery round bookkeeping', 'description' => 'Tracked payments, invoices and expenses for a 3-rider delivery business. Bookkeeping and customer service every day.'],
+            ],
+            'juma' => [
+                ['type' => 'community', 'title' => 'Parents association coordinator', 'description' => 'Coordinated volunteers, organised events, handled complaints and communication with 200 families. Project coordination and record keeping.'],
+            ],
+        ];
+        foreach ($stories as $key => $items) {
+            if (! isset($candidates[$key])) {
+                continue;
+            }
+            foreach ($items as $item) {
+                $discovery->addExperience($candidates[$key], $item);
+            }
+        }
+
+        app(MatchEngine::class)->refreshAll(0);
+        $service = app(\App\Services\RediscoveryService::class);
+        $service->scanAll();
+
+        // one invitation already approved so the candidate side of the story is visible
+        $first = \App\Models\RediscoveryRecommendation::where('status', 'pending_review')->orderByDesc('score')->first();
+        if ($first) {
+            $service->invite($first, 'donswift');
+        }
     }
 
     private function seedSkills(): array

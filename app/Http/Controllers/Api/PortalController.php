@@ -75,6 +75,7 @@ class PortalController extends Controller
                 [
                     'claimed_years' => $s['years'],
                     'claimed_evidence' => $s['evidence'],
+                    'source' => 'CV',
                 ]
             );
         }
@@ -88,6 +89,8 @@ class PortalController extends Controller
             ['status' => 'applied']
         );
         $application = app(MatchEngine::class)->scoreApplication($application);
+        app(\App\Services\RediscoveryService::class)->forApplication($application);
+        $candidate->notify('application', "Application received: {$application->job->title}", 'We will keep you updated here at every stage. No need to call.', '/applications');
 
         return response()->json([
             'message' => 'Application received - you will be kept informed',
@@ -137,6 +140,8 @@ class PortalController extends Controller
             ],
             'applications' => $applications,
             'suggested_jobs' => $suggested,
+            'unread_notifications' => $candidate->notifications()->whereNull('read_at')->count(),
+            'open_invitations' => $candidate->rediscoveries()->where('status', 'invited')->count(),
         ]);
     }
 
@@ -158,6 +163,8 @@ class PortalController extends Controller
 
         $attempt = app(AssessmentService::class)->submit($candidate, $data['job_id'] ?? null, $data['answers']);
         app(MatchEngine::class)->refreshAll(0);
+        app(\App\Services\RediscoveryService::class)->scanAll();
+        $candidate->notify('assessment', 'Skills check completed', "You scored {$attempt->overall_score}. Your proven skills now count in every match.", '/skills');
 
         return response()->json([
             'attempt_id' => $attempt->id,

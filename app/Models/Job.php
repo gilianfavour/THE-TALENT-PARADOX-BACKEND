@@ -11,11 +11,13 @@ class Job extends Model
         'title', 'client_name', 'location', 'employment_type',
         'salary_min', 'salary_max', 'deadline', 'status',
         'description', 'requirements_text', 'parsed_requirements',
+        'level', 'requirements_approved_at',
     ];
 
     protected $casts = [
         'deadline' => 'date',
         'parsed_requirements' => 'array',
+        'requirements_approved_at' => 'datetime',
     ];
 
     public function applications(): HasMany

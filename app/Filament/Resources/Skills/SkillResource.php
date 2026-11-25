@@ -31,6 +31,11 @@ class SkillResource extends Resource
         return SkillForm::configure($schema);
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Oversight';
+    }
+
     public static function table(Table $table): Table
     {
         return SkillsTable::configure($table);

@@ -29,6 +29,11 @@ class CandidateResource extends Resource
         return CandidateForm::configure($schema);
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Talent';
+    }
+
     public static function table(Table $table): Table
     {
         return CandidatesTable::configure($table);

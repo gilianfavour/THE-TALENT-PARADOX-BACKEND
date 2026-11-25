@@ -36,6 +36,11 @@ class JobResource extends Resource
         return JobForm::configure($schema);
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Recruitment';
+    }
+
     public static function table(Table $table): Table
     {
         return JobsTable::configure($table);

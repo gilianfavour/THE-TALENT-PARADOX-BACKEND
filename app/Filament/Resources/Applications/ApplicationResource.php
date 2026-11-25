@@ -34,6 +34,11 @@ class ApplicationResource extends Resource
         return ApplicationForm::configure($schema);
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Recruitment';
+    }
+
     public static function table(Table $table): Table
     {
         return ApplicationsTable::configure($table);

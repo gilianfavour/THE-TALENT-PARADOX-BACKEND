@@ -38,6 +38,13 @@ class StatsOverview extends StatsOverviewWidget
                 ->description('would have been missed by CV screening')
                 ->icon('heroicon-o-sparkles')
                 ->color('warning'),
+            Stat::make('Skills evidenced beyond the CV', \App\Models\CandidateSkill::where(fn ($q) => $q->whereNotNull('demonstrated_score')->orWhereIn('evidence_status', ['ai_inferred', 'evidence_supported', 'human_validated']))->count())
+                ->description('AI-inferred, evidenced, assessed or validated')
+                ->icon('heroicon-o-shield-check')
+                ->color('success'),
+            Stat::make('Experiences captured', \App\Models\Experience::count())
+                ->description('projects, informal work, volunteering and more')
+                ->icon('heroicon-o-light-bulb'),
             Stat::make('Recruiter decisions', Decision::count())
                 ->description('human judgement is final')
                 ->icon('heroicon-o-scale'),

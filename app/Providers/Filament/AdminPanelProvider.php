@@ -34,14 +34,16 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('2rem')
             ->font('Manrope')
             ->sidebarCollapsibleOnDesktop()
+            ->navigationGroups(['Recruitment', 'Talent', 'Oversight'])
             ->defaultThemeMode(ThemeMode::Light)
             ->colors([
                 'primary' => Color::Red,
                 'gray' => Color::Zinc,
             ])
             ->renderHook('panels::head.end', fn (): HtmlString => new HtmlString(view('filament.admin-styles')->render()))
+            ->renderHook('panels::auth.login.form.before', fn (): HtmlString => new HtmlString(view('filament.login-intro')->render()))
             ->renderHook('panels::auth.login.form.after', fn (): HtmlString => new HtmlString(
-                '<p style="margin-top:1rem;text-align:center;font-size:.8rem;color:#71717a">Demo login: admin@secondlook.test / password</p>'
+                '<div class="tb-login-demo"><span>Demo login</span> admin@secondlook.test &nbsp;/&nbsp; password</div>'
             ))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -50,6 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                \App\Filament\Widgets\WelcomeBanner::class,
                 \App\Filament\Widgets\StatsOverview::class,
                 \App\Filament\Widgets\HiddenGems::class,
                 \App\Filament\Widgets\RediscoveryQueue::class,

@@ -22,6 +22,11 @@ class RediscoveryRecommendationResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Talent';
+    }
+
     public static function getNavigationBadge(): ?string
     {
         $n = RediscoveryRecommendation::where('status', 'pending_review')->count();

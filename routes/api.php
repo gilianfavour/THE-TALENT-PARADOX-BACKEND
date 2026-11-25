@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CandidateAuthController;
 use App\Http\Controllers\Api\PortalController;
 use App\Http\Controllers\Api\PracticalTaskController;
 use App\Http\Controllers\Api\TalentController;
@@ -37,10 +38,23 @@ Route::get('/portal/{token}/tasks', [PracticalTaskController::class, 'index']);
 Route::get('/portal/{token}/tasks/{slug}', [PracticalTaskController::class, 'show']);
 Route::post('/portal/{token}/tasks/{slug}', [PracticalTaskController::class, 'submit']);
 
+// Candidate accounts
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/auth/register', [CandidateAuthController::class, 'register']);
+    Route::post('/auth/login', [CandidateAuthController::class, 'login']);
+    Route::post('/portal/{token}/password', [CandidateAuthController::class, 'setPassword']);
+});
+Route::get('/auth/me/{token}', [CandidateAuthController::class, 'me']);
+
 // Local only: load the spec's demo story (fresh graduate + informal-sector rediscovery) on top of existing data
 if (app()->environment('local')) {
     Route::post('/dev/demo-story', function () {
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\DemoStorySeeder', '--force' => true]);
+
+        return response()->json(['ok' => true, 'output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
+    });
+    Route::post('/dev/migrate', function () {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
 
         return response()->json(['ok' => true, 'output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
     });

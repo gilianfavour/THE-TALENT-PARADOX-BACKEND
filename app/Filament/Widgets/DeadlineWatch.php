@@ -24,7 +24,7 @@ class DeadlineWatch extends TableWidget
                     ->color(fn ($record) => $record->deadline && $record->deadline->isBefore(now()->addDays(7)) ? 'danger' : 'success'),
                 \Filament\Tables\Columns\TextColumn::make('days')
                     ->label('Days left')
-                    ->getStateUsing(fn ($record) => $record->deadline ? now()->diffInDays($record->deadline, false) : null)
+                    ->getStateUsing(fn ($record) => $record->deadline ? (int) round(now()->diffInDays($record->deadline, false)) : null)
                     ->badge()
                     ->color(fn ($state) => $state <= 7 ? 'danger' : 'success'),
             ]);

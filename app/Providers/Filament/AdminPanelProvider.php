@@ -11,7 +11,6 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Support\HtmlString;
@@ -53,8 +52,8 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 \App\Filament\Widgets\StatsOverview::class,
                 \App\Filament\Widgets\HiddenGems::class,
+                \App\Filament\Widgets\RediscoveryQueue::class,
                 \App\Filament\Widgets\DeadlineWatch::class,
-                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

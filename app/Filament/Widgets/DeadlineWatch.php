@@ -9,12 +9,17 @@ use Illuminate\Database\Eloquent\Builder;
 
 class DeadlineWatch extends TableWidget
 {
+    protected static ?int $sort = 4;
+
+    protected int|string|array $columnSpan = 'full';
+
     protected static ?string $heading = 'Client deadlines approaching';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(fn (): Builder => Job::open()->orderBy('deadline'))
+            ->defaultPaginationPageOption(5)
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('title')->weight('semibold'),
                 \Filament\Tables\Columns\TextColumn::make('client_name')->label('Client'),

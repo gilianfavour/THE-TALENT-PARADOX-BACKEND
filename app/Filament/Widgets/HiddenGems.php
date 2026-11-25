@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class HiddenGems extends TableWidget
 {
+    protected static ?int $sort = 3;
+
+    protected int|string|array $columnSpan = 'full';
+
     protected static ?string $heading = 'Hidden gems - overlooked by CVs, surfaced by evidence';
 
     public function table(Table $table): Table
@@ -17,6 +21,7 @@ class HiddenGems extends TableWidget
             ->query(fn (): Builder => Application::with(['candidate', 'job'])
                 ->where('match_snapshot', 'like', '%hidden_gem%')
                 ->orWhere('match_snapshot', 'like', '%better_fit_elsewhere%'))
+            ->defaultPaginationPageOption(5)
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('candidate.name')->weight('semibold'),
                 \Filament\Tables\Columns\TextColumn::make('job.title')->label('Applied for'),

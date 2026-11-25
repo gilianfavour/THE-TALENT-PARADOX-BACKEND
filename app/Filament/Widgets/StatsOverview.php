@@ -11,6 +11,10 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverview extends StatsOverviewWidget
 {
+    protected static ?int $sort = 1;
+
+    protected int|string|array $columnSpan = 'full';
+
     protected function getStats(): array
     {
         $apps = Application::query();
@@ -37,6 +41,11 @@ class StatsOverview extends StatsOverviewWidget
             Stat::make('Recruiter decisions', Decision::count())
                 ->description('human judgement is final')
                 ->icon('heroicon-o-scale'),
+            Stat::make('Rediscovery awaiting review', \App\Models\RediscoveryRecommendation::where('status', 'pending_review')->count())
+                ->description(\App\Models\RediscoveryRecommendation::where('status', 'invited')->count() . ' candidates invited to other roles')
+                ->icon('heroicon-o-arrow-path')
+                ->color('danger')
+                ->url(\App\Filament\Resources\Rediscovery\RediscoveryRecommendationResource::getUrl('index')),
         ];
     }
 }

@@ -24,6 +24,20 @@ class TalentDiscovery
         $text = trim(implode(' ', array_filter([$data['title'] ?? '', $data['organisation'] ?? '', $data['description'] ?? ''])));
         $parsed = $this->parser->parse($text . ' ' . $text); // parser needs some length; repeat is harmless for matching
 
+        // AI semantic discovery: "coordinated 30 volunteers" -> Project Management, even without the keyword
+        $ai = app(\App\Services\Ai\AiInsights::class);
+        $aiSkills = $ai->skillsFromText($text, Experience::TYPES[$data['type']] ?? $data['type']);
+        if ($aiSkills) {
+            $known = collect($parsed['skills'])->keyBy('skill_id');
+            foreach ($aiSkills as $s) {
+                if (! $known->has($s['skill_id'])) {
+                    $known->put($s['skill_id'], ['skill_id' => $s['skill_id'], 'name' => $s['name'], 'evidence' => $s['evidence'] ?: $text, 'ai' => true]);
+                }
+            }
+            $parsed['skills'] = $known->values()->all();
+        }
+        $sourceSuffix = $aiSkills ? ' (AI-inferred by Claude)' : '';
+
         $inferred = [];
         $hasEvidence = ! empty($data['evidence_url']);
         foreach ($parsed['skills'] as $s) {
@@ -34,7 +48,7 @@ class TalentDiscovery
             $target = $hasEvidence ? 'evidence_supported' : 'ai_inferred';
             if (! $current || $this->rank($target) > $this->rank($current)) {
                 $cs->evidence_status = $target;
-                $cs->source = Experience::TYPES[$data['type']] ?? $data['type'];
+                $cs->source = (Experience::TYPES[$data['type']] ?? $data['type']) . $sourceSuffix;
             }
             $cs->claimed_evidence ??= mb_substr($text, 0, 240);
             $cs->save();
@@ -101,6 +115,7 @@ class TalentDiscovery
                 'inferred_skills' => $e->inferred_skills ?? [],
             ]),
             'experience_types' => Experience::TYPES,
+            'ai' => ['enabled' => app(\App\Services\Ai\AiInsights::class)->enabled(), 'engine' => app(\App\Services\Ai\Claude::class)->label()],
         ];
     }
 }

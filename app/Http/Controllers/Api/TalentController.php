@@ -164,6 +164,7 @@ class TalentController extends Controller
             'candidates' => Candidate::count(),
             'skills_proven' => \App\Models\CandidateSkill::whereNotNull('demonstrated_score')->count(),
             'rediscovered' => RediscoveryRecommendation::count(),
+            'ai_engine' => app(\App\Services\Ai\Claude::class)->label(),
         ]);
     }
 }

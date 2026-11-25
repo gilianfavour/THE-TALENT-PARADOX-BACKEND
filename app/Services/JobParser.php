@@ -41,13 +41,51 @@ class JobParser
         // soft skills get a floor: jobs almost always need communication/teamwork
         $soft = array_values(array_filter($preferred, fn ($s) => in_array($s['category'], ['Soft Skills'], true)));
 
-        return [
+        $result = [
             'required_skills' => $required,
             'preferred_skills' => $preferred,
             'years_min' => $this->detectYears($lower),
             'education_min' => $this->detectEducation($lower),
             'summary' => $this->summarize($job->title, $required, $preferred),
+            'engine' => 'rules',
         ];
+
+        return $this->withAi($job, $result);
+    }
+
+    /**
+     * AI vacancy intelligence (Claude): semantic competencies, behavioural expectations,
+     * practical job tasks and SUGGESTED mandatory conditions for the recruiter to confirm.
+     * Merged with the rule-based result so nothing the rules found is lost.
+     */
+    private function withAi(Job $job, array $rules): array
+    {
+        $ai = app(\App\Services\Ai\AiInsights::class)->analyseJob($job);
+        if (! $ai) {
+            return $rules;
+        }
+
+        $required = collect($rules['required_skills'])->keyBy('skill_id');
+        foreach ($ai['required_skills'] as $s) {
+            $required->put($s['skill_id'], $required->get($s['skill_id'], $s));
+        }
+        $preferred = collect($rules['preferred_skills'])->keyBy('skill_id')->except($required->keys()->all());
+        foreach ($ai['preferred_skills'] as $s) {
+            if (! $required->has($s['skill_id'])) {
+                $preferred->put($s['skill_id'], $preferred->get($s['skill_id'], $s));
+            }
+        }
+
+        return array_merge($rules, [
+            'required_skills' => $required->values()->all(),
+            'preferred_skills' => $preferred->values()->all(),
+            'years_min' => $rules['years_min'] ?? $ai['years_min'],
+            'summary' => $ai['summary'] ?: $rules['summary'],
+            'behavioural_expectations' => $ai['behavioural_expectations'],
+            'practical_tasks' => $ai['practical_tasks'],
+            'mandatory_suggestions' => $ai['mandatory_suggestions'],
+            'engine' => app(\App\Services\Ai\AiInsights::class)->engine(),
+        ]);
     }
 
     /** Returns [requiredZoneText, preferredZoneText]. If no markers, both fall back sensibly. */

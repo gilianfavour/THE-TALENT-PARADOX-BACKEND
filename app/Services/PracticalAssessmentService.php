@@ -41,7 +41,19 @@ class PracticalAssessmentService
         }
 
         $score = (int) round($total);
+        $engine = 'rubric-rules';
+
+        $aiGrade = app(\App\Services\Ai\AiInsights::class)->gradeTask($task, $response);
+        if ($aiGrade) {
+            $criteria = $aiGrade['criteria'];
+            $score = $aiGrade['score'];
+            $engine = app(\App\Services\Ai\AiInsights::class)->engine();
+        }
+
         $reasons = [];
+        if (! empty($aiGrade['attention'])) {
+            $reasons[] = $aiGrade['attention'];
+        }
         if ($score >= 40 && $score <= 75) {
             $reasons[] = 'Borderline preliminary score';
         }
@@ -57,6 +69,7 @@ class PracticalAssessmentService
             'words' => $words,
             'criteria' => $criteria,
             'review_reason' => $reasons ? implode('; ', $reasons) : 'Standard human validation',
+            'engine' => $engine,
         ];
     }
 
@@ -100,6 +113,7 @@ class PracticalAssessmentService
                 'criteria' => $result['criteria'],
                 'status' => 'needs_review',
                 'review_reason' => $result['review_reason'],
+                'engine' => $result['engine'],
             ],
             'completed_at' => now(),
         ]);

@@ -191,7 +191,7 @@ class MatchEngine
             $signals[] = 'overqualified';
             $explanations[] = "Overqualified on paper ({$candYears} yrs vs {$reqYears} required) - check motivation fit";
         }
-        if ($reqYears === 0 && $flags['early_career'] ?? false) {
+        if ($reqYears === 0 && ($flags['early_career'] ?? false)) {
             $signals[] = 'early_career';
             $explanations[] = 'Early-career candidate - potential over pedigree';
         }

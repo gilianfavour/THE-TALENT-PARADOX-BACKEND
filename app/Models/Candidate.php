@@ -11,8 +11,10 @@ class Candidate extends Model
     protected $fillable = [
         'name', 'email', 'phone', 'location', 'portal_token', 'headline',
         'cv_text', 'profile_flags', 'status', 'career_interests',
-        'talent_pool_visible', 'consent_rediscovery',
+        'talent_pool_visible', 'consent_rediscovery', 'password',
     ];
+
+    protected $hidden = ['password'];
 
     protected $casts = [
         'profile_flags' => 'array',

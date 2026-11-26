@@ -1,11 +1,19 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PortalController;
 use App\Http\Controllers\Api\PracticalTaskController;
 use App\Http\Controllers\Api\TalentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['ok' => true, 'service' => 'secondlook']));
+
+// Candidate authentication (token-based, password optional)
+Route::prefix('/auth')->group(function () {
+    Route::get('/me/{token}', [AuthController::class, 'me']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
 
 Route::get('/jobs', [PortalController::class, 'jobs']);
 Route::get('/jobs/{job}', [PortalController::class, 'job']);
@@ -30,6 +38,7 @@ Route::prefix('/portal/{token}')->group(function () {
     Route::post('/opportunities/{recommendation}/respond', [TalentController::class, 'respond']);
     Route::get('/notifications', [TalentController::class, 'notifications']);
     Route::post('/notifications/read', [TalentController::class, 'markRead']);
+    Route::post('/password', [AuthController::class, 'setPassword']);
 });
 
 // Competency Assessment: vacancy-specific practical tasks scored against a rubric, validated by a recruiter

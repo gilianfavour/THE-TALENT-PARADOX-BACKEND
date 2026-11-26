@@ -1,7 +1,8 @@
 #!/bin/sh
 # Boot script for production (Render + Supabase Postgres).
-# - Never drops or re-seeds the database.
-# - Runs only pending migrations on each deploy.
+# - Never drops tables.
+# - Runs pending migrations on every deploy.
+# - Seeds once: only if the users table is empty (first boot).
 set -e
 cd /app
 

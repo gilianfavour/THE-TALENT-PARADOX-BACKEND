@@ -41,6 +41,7 @@ class PracticalTaskController extends Controller
             'final_score' => $ans['final_score'] ?? null,
             'criteria' => $ans['criteria'] ?? [],
             'review_reason' => $ans['review_reason'] ?? null,
+            'engine' => $ans['engine'] ?? 'rubric-rules',
             'reviewer' => $ans['reviewer'] ?? null,
             'review_note' => $ans['review_note'] ?? null,
             'submitted_at' => $a->completed_at?->toIso8601String(),

@@ -19,10 +19,14 @@ use Illuminate\Support\Str;
  *  - Candidate B (fresh graduate): no job history, a university management-system project, a practical coding task.
  *  - Candidate C (informal sector): family shop + community work, applies for Administration Officer,
  *    is a weak match there and is rediscovered for Project Support Officer.
+ * Both demo candidates get accounts (see DEMO_PASSWORD) so the demo can show candidate sign-in.
  * Run: php artisan db:seed --class=DemoStorySeeder
  */
 class DemoStorySeeder extends Seeder
 {
+    /** Demo candidate accounts sign in with their email and this password (local demo data only). */
+    private const DEMO_PASSWORD = 'password';
+
     public function run(): void
     {
         $project = Job::updateOrCreate(
@@ -92,6 +96,10 @@ class DemoStorySeeder extends Seeder
             ['email' => $email],
             ['name' => $name, 'location' => $location, 'headline' => $headline, 'cv_text' => $cv, 'portal_token' => Str::random(40), 'status' => 'active']
         );
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('candidates', 'password') && ! $candidate->getAttribute('password')) {
+            $candidate->forceFill(['password' => \Illuminate\Support\Facades\Hash::make(self::DEMO_PASSWORD)])->save();
+        }
 
         if ($candidate->skills()->count() === 0) {
             $parsed = app(CvParser::class)->parse($cv);

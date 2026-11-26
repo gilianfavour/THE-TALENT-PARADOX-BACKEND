@@ -53,19 +53,28 @@ class PortalController extends Controller
             'phone' => 'nullable|string|max:50',
             'location' => 'nullable|string|max:255',
             'cv_text' => 'required|string|min:50',
+            'session_token' => 'nullable|string|max:64',
+            'password' => ['nullable', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)],
         ]);
 
-        $candidate = Candidate::updateOrCreate(
-            ['email' => $data['email']],
-            [
-                'name' => $data['name'],
-                'phone' => $data['phone'] ?? null,
-                'location' => $data['location'] ?? null,
-                'cv_text' => $data['cv_text'],
-                'portal_token' => Str::random(40),
-                'status' => 'active',
-            ]
-        );
+        $existing = Candidate::where('email', $data['email'])->first();
+        // an account's applications can only be made by its signed-in owner
+        if ($existing && $existing->password && ($data['session_token'] ?? null) !== $existing->portal_token) {
+            return response()->json(['message' => 'An account exists for this email. Sign in to apply.', 'needs_sign_in' => true], 409);
+        }
+
+        $candidate = $existing ?? new Candidate(['email' => $data['email'], 'portal_token' => Str::random(40)]);
+        $candidate->fill([
+            'name' => $data['name'],
+            'phone' => $data['phone'] ?? $candidate->phone,
+            'location' => $data['location'] ?? $candidate->location,
+            'cv_text' => $data['cv_text'],
+            'status' => 'active',
+        ]);
+        if (! empty($data['password']) && ! $candidate->password) {
+            $candidate->password = $data['password']; // create the account while applying
+        }
+        $candidate->save();
 
         // parse the CV into claimed skills + profile flags
         $parsed = app(CvParser::class)->parse($data['cv_text']);
@@ -93,6 +102,8 @@ class PortalController extends Controller
         $candidate->notify('application', "Application received: {$application->job->title}", 'We will keep you updated here at every stage. No need to call.', '/applications');
 
         return response()->json([
+            'name' => $candidate->name,
+            'has_account' => (bool) $candidate->password,
             'message' => 'Application received - you will be kept informed',
             'portal_url' => url("/portal/{$candidate->portal_token}"),
             'token' => $candidate->portal_token,

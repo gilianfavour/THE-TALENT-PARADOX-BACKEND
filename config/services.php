@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    // AI intelligence layer (Claude). Without a key, every feature falls back to the rules.
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-haiku-5-5'),
+        'url' => env('ANTHROPIC_URL', 'https://api.anthropic.com'),
+        'timeout' => env('ANTHROPIC_TIMEOUT', 25),
+    ],
+
 ];
